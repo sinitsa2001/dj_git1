@@ -7,7 +7,7 @@ def index (request):
     }
     return render(request, 'mainapp/index.html', context)
 
-def products (request):
+def products (request, pk =None):
     context = {
         'title': 'Эти вещи для тебя',
         'products': Product.objects.all(),
