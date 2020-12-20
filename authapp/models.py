@@ -7,6 +7,9 @@ class User(AbstractUser):
     # sex = models.BooleanField
 
 
+
+
+
 def __str__(self):
     return self.username
 
