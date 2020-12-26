@@ -45,11 +45,22 @@ def profile(request):
     else:
         form = UserProfileForm(instance=request.user)
     baskets = Basket.objects.filter(user=request.user)
+
+    # total_quantity = 0
+    # for basket in Basket.objects.filter(user=request.user):
+    #     total_quantity += basket.quantity
+    #
+    # total_sum =0
+    # for basket in Basket.objects.filter(user=request.user):
+    #     total_sum += basket.sum()
+
+
+
     context = {
             'form':form,
             'baskets': baskets,
-
-
+            # 'total_quantity':sum(basket.quantity for basket in baskets),
+            # 'total_sum': sum(basket.sum() for basket in baskets),
                    }
     return render(request,'authapp/profile.html',context)
 
