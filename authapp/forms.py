@@ -16,11 +16,11 @@ class UserLoginForm(AuthenticationForm):
             field.widget.attrs['class'] = "form-control py-4"
 
 class UserRegisterForm(UserCreationForm):
-    avatar = forms.ImageField(widget=forms.FileInput())
+    # avatar = forms.ImageField(widget=forms.FileInput())
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'age','avatar')
+        fields = ('username', 'email', 'first_name', 'last_name', 'password1', 'password2' )
 
     def __init__(self, *args, **kwargs):
         super(UserRegisterForm, self).__init__(*args, **kwargs)
@@ -32,8 +32,8 @@ class UserRegisterForm(UserCreationForm):
         self.fields['last_name'].widget.attrs['placeholder'] = 'Введите фамилию'
         self.fields['password1'].widget.attrs['placeholder'] = 'Введите пароль'
         self.fields['password2'].widget.attrs['placeholder'] = 'Подтвердите пароль'
-        self.fields['age'].widget.attrs['placeholder'] = 'Введите ваш возраст'
-        self.fields['avatar'].widget.attrs['class'] = True,'custom-file-input'
+        # self.fields['age'].widget.attrs['placeholder'] = 'Введите ваш возраст'
+        # self.fields['avatar'].widget.attrs['class'] = True,'custom-file-input'
 
 
 
