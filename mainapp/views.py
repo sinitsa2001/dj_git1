@@ -1,5 +1,8 @@
 from django.shortcuts import render
-from mainapp.models import Product,ProductCategory
+
+from mainapp.models import Product, ProductCategory
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 def index (request):
     context = {
@@ -7,21 +10,32 @@ def index (request):
     }
     return render(request, 'mainapp/index.html', context)
 
-def products (request, pk =None):
-    context = {
-        'title': 'Эти вещи для тебя',
-        'products': Product.objects.all(),
-        'category': ProductCategory.objects.all(),
-        # 'products': [
-        #     { 'name':'Худи черного цвета с монограммами adidas Originals', 'price':'6 090,00 руб.'},
-        #     {'name': 'Синяя куртка The North Face', 'price': '23 725,00 руб.'},
-        #     {'name': 'Коричневый спортивный oversized-топ ASOS DESIGN', 'price': '3 390,00 руб.'},
-        #     {'name': 'Черный рюкзак Nike Heritage', 'price': '2 340,00 руб.'},
-        #     {'name': 'Черные туфли на платформе с 3 парами люверсов Dr Martens 1461 Bex', 'price': '13 590,00 руб.'},
-        #     {'name': 'Темно-синие широкие строгие брюки ASOS DESIGN', 'price': '2 890,00 руб.'},
-        # ]
-    }
-    return render(request, 'mainapp/products.html', context = context)
+def products (request, category_id =None, page =1):
+    context = {'title': 'Категории', 'category': ProductCategory.objects.all()}
+    if category_id:
+        products = Product.objects.filter(category_id=category_id).order_by('price')
+        # context.update({'products':products})
+    else:
+        products = Product.objects.all().order_by('price')
+        # context.update({'products': products})
+    paginator = Paginator(products,3)
+    try:
+        products_paginator = paginator.page(page)
+    except PageNotAnInteger:
+        products_paginator = paginator.page(1)
+    except EmptyPage:
+        products_paginator = paginator.page(paginator.num_pages)
+    context.update({'products': products_paginator})
+
+
+    return render(request, 'mainapp/products.html', context)
+
+
+
+
+
+
+
 
 # def categories (request):
 #     context ={
@@ -34,19 +48,3 @@ def products (request, pk =None):
 #     return render(request, 'mainapp/products.html', context=context)
 
 
-def test_context (request):
-    context ={
-        'title':'добро пожаловать',
-        'username':'Lele Sinitsyna',
-        'products': [
-            {'name':'Черное худи', 'price': '12000 usd'},
-            {'name': 'Белое разное', 'price': '2000 usd'},
-        ],
-        # 'promotion':True,
-        'promotion_products':[
-            {'name': 'Тухольки', 'price': 'Дешевле грибов'},
-        ]
-
-    }
-# products= context['products']
-    return render(request, 'mainapp/context.html',context)
