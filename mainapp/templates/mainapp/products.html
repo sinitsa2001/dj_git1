@@ -16,7 +16,7 @@
             <h1 class="my-4">GeekShop</h1>
             {% for category in category %}
             <div class="list-group">
-                <a href="#" class="list-group-item">{{category.name}}</a>
+                <a href="{% url 'mainapp:product' category.id %}" class="list-group-item">{{category.name}}</a>
 {#                <a href="#" class="list-group-item">{{category.name}}</a>#}
 {#                <a href="#" class="list-group-item">{{category.name}}</a>#}
 {#                <a href="#" class="list-group-item">{{category.name}}</a>#}
@@ -91,9 +91,30 @@
                     </div>
                 </div>
             {% endfor %}
-       </div>
-
             </div>
+
+            <nav aria-label="Page navigation example" class="d-block mx-auto">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not products.has_previous %} disabled {% endif %}">
+                        <a class="page-link" href="{% if not products.has_previous %} # {% else %} {% url 'products:page' products.previous_page_number %}{% endif %}">Предыдущая</a>
+                    </li>
+                {% for page in products.paginator.page_range %}
+                    <li class="page-item"><a class="page-link" href="{% url 'products:page' page %}">{{ page }}</a></li>
+                {% endfor %}
+
+{#                    <li class="page-item active" aria-current="page">#}
+{#                        <a class="page-link" href="#">2</a>#}
+{#                    </li>#}
+{#                    <li class="page-item"><a class="page-link" href="#">3</a></li>#}
+                    <li class="page-item {% if not products.has_next %} disabled {% endif %}">
+                        <a class="page-link" href="{% if not products.has_next %} # {% else %} {% url 'products:page' products.next_page_number %}{% endif %}">Следующая</a>
+{#                        <a class="page-link" href="#">Следующая</a>#}
+                    </li>
+                </ul>
+            </nav>
+
+
+        </div>
             <!-- /.row -->
 
         </div>
