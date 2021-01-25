@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponseRedirect
+from django.shortcuts import render, HttpResponseRedirect,get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
@@ -7,7 +7,10 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView,UpdateView,DeleteView
 
 from authapp.models import User
-from adminapp.forms import UserAdminRegisterForm,UserAdminProfileForm
+from adminapp.forms import UserAdminRegisterForm,UserAdminProfileForm,ProductCategoryEditForm
+
+from mainapp.models import ProductCategory,Product
+
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -117,3 +120,72 @@ class UserDeleteView(DeleteView):
 #     user.save()
 #     # user.delete()
 #     return HttpResponseRedirect(reverse('admin_staff:admin_users'))
+
+# пробная модель категорий
+def categories(request):
+    title = 'админка/категории'
+    categories_list = ProductCategory.objects.all()
+
+    context ={
+        'title':title,
+        'objects':categories_list
+    }
+    return render(request,'adminapp/admin-categories.html',context)
+
+# class ProductCategory(ListView):
+#     model = User
+#     template_name = 'adminapp/admin-categories.html'
+#
+#
+#     @method_decorator(user_passes_test(lambda u: u.is_superuser))
+#     def dispatch(self, request, *args, **kwargs):
+#         return super(ProductCategory,self).dispatch(request, *args, **kwargs)
+
+def category_create(self, request, pk, *args, **kwargs):
+    pass
+
+@user_passes_test(lambda u: u.is_superuser)
+def category_update(request, pk, *args, **kwargs):
+    title = 'админка/редактирование/удаление',
+    category = get_object_or_404(ProductCategory, pk=pk)
+
+    if request.metod == 'POST':
+        form = ProductCategoryEditForm(data =request.POST, files =request.FILES, instance = category)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('admin_staff:admin_categories'))
+        else:
+            pass
+
+    context ={'form':form, 'category':category}
+    return render(request,'adminapp/admin-categories.html', context)
+
+
+def category_delete(self, request, pk, *args, **kwargs):
+    pass
+
+
+
+def products(request, pk, *args, **kwargs):
+    title = 'админка/продукт'
+    category = get_object_or_404(ProductCategory, pk=pk)
+    products_list = Product.objects.filter(category_pk=pk).order_by ('name')
+    context ={
+        'title':title,
+        'category':category,
+        'objects':products_list
+    }
+    return render(request,'adminapp/products.html', context)
+
+def product_create(request, pk, *args, **kwargs):
+    pass
+
+
+def product_read (request, pk, *args, **kwargs):
+    pass
+
+def product_update(request, pk, *args, **kwargs):
+    pass
+
+def product_delete(request, pk, *args, **kwargs):
+    pass
