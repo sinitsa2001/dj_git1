@@ -1,9 +1,36 @@
+from django.conf import settings
 from django.contrib import auth, messages
+from django.core.mail import send_mail
 from django.shortcuts import render, HttpResponseRedirect
 from django.urls import reverse
 
-from authapp.forms import UserLoginForm, UserRegisterForm, UserProfileForm
+from authapp.forms import UserLoginForm, UserRegisterForm, UserProfileForm, UserProfileEditForm
+from authapp.models import User
 from basketapp.models import Basket
+
+
+def send_verify_email(user):
+    verify_link = reverse('authapp:verify', args=[user.email, user.activation_key])
+
+    subject = f'подтверждение учетной записи {user.username}'
+
+    message = f'Для подтверждения перейдите по ссылке: {settings.DOMAIN}{verify_link}'
+
+    return send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email], fail_silently =False)
+
+
+def verify(request, email, activation_key):
+    # user = User.objects.get_object_or_404(email =email)
+    try:
+        user = User.objects.get(email=email)
+        if user.activation_key == activation_key and not user.is_activation_key_expired():
+            user.is_active = True
+            user.activation_key = None
+            user.save()
+            auth.login(request, user)
+        return render(request, 'authapp/verification.html')
+    except Exception as ex:
+        return HttpResponseRedirect(reverse('main'))
 
 
 def login(request):
@@ -26,7 +53,11 @@ def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(data=request.POST)
         if form.is_valid():
-            form.save()
+            user =form.save()
+            if send_verify_email(user):
+                print('success')
+            else:
+                print('failed')
             messages.success(request,'Вы успешно зарегистрировались!')
             return HttpResponseRedirect(reverse('authapp:login'))
     else:
@@ -39,11 +70,13 @@ def register(request):
 def profile(request):
     if request.method == 'POST':
         form = UserProfileForm(data=request.POST, files=request.FILES, instance=request.user)
-        if form.is_valid():
+        profile_form = UserProfileEditForm(request.POST, instance=request.user.userprofile)
+        if form.is_valid() and profile_form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('authapp:profile'))
     else:
         form = UserProfileForm(instance=request.user)
+        profile_form = UserProfileEditForm(instance=request.user.userprofile)
     baskets = Basket.objects.filter(user=request.user)
 
     # total_quantity = 0
@@ -59,6 +92,7 @@ def profile(request):
     context = {
             'form':form,
             'baskets': baskets,
+            'profile_form': profile_form,
             # 'total_quantity':sum(basket.quantity for basket in baskets),
             # 'total_sum': sum(basket.sum() for basket in baskets),
                    }
