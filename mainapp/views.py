@@ -37,14 +37,14 @@ def products (request, category_id =None, page =1):
 
 
 
-# def categories (request):
-#     context ={
-#         'category': ProductCategory.objects.all()
-#     }
-#     return render(request, 'mainapp/products.html', context)
+def categories (request):
+    context ={
+        'category': ProductCategory.objects.all()
+    }
+    return render(request, 'mainapp/products.html', context)
 
 # def categories (request):
 #
-#     return render(request, 'mainapp/products.html', context=context)
-
+#     return render(request, 'mainapp/products.html', context=categories())
+#
 
