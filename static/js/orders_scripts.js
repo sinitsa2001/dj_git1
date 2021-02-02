@@ -21,6 +21,19 @@ window.onload = function (){
     }
     // console.log(quantity_arr);
     // console.log(price_arr);
+
+    function orderSummaryRecalc() {
+        order_total_price = 0;
+        order_total_quantity = 0;
+        for (var i = 0; i < TOTAL_FORMS; i++) {
+            order_total_quantity += quantity_arr[i];
+            order_total_price += price_arr[i] * quantity_arr[i];
+            $('.order_total_quantity').html(order_total_quantity.toString());
+            $('.order_total_cost').html(Number(order_total_price.toFixed(2).toString()));
+        }
+
+    }
+
     $('.order_form').on('click', 'input[type=number]', function (){
         var target = event.target;
         orderitem_num =parseInt(target.name.replace('orderitems-','').replace('-quantity',''));
@@ -42,6 +55,36 @@ window.onload = function (){
          }
          orderSummaryUpdate(price_arr[orderitem_num], delta_quantity);
     });
+//функционал подстановки цены (динамически) через аякс при выборе товара, и т.д
+    //TODO:  не работает - надо разобраться как будет время - какая то проблема видимо с полями
+
+
+
+     $('.order_form').on('change', 'select', function (){
+       var target = event.target;
+       orderitem_num =parseInt(target.name.replace('orderitems-','').replace('-product',''));
+       var orderitem_product_pk = target.options[target.selectedIndex].value;
+       if (orderitem_product_pk){
+           $.ajax({
+               url: '/order/product/'+ orderitem_product_pk + '/price/',
+               success: function (data){
+                   if(data.price){
+                       price_arr[orderitem_num]=parseFloat(data.price);
+                       if(isNaN(quantity_arr[orderitem_num])){
+                           quantity_arr[orderitem_num] = 0;
+                       }
+                       var price_html = '<span>' + data.price.toString().replace('.', ',') + '</span> руб';
+                       var current_tr = $('.order_form table').find('tr:eq(' + (orderitem_num +1) +')');
+                       current_tr.find('td:eq(2)').html(price_html);
+                       orderSummaryRecalc();
+
+                   }
+               }
+
+           })
+       }
+ч
+     });
 
      function orderSummaryUpdate(orderitem_price, delta_quantity){
          delta_cost = orderitem_price * delta_quantity;
@@ -53,5 +96,23 @@ window.onload = function (){
          $('.order_total_cost').html(order_total_price.toString());
 
      }
+
+     $('.formset_row').formset({
+         addText:'добавить товар',
+         deleteText: 'удалить товар',
+         prefix:'orderitems',
+         removed: deleteOrderItem
+     });
+
+     function deleteOrderItem(row){
+         var target_name = row[0].querySelector('input[type=number]').name;
+         orderitem_num = parseInt(target_name.replace('orderitems-','').replace('-quantity',''));
+         delta_quantity = -quantity_arr[orderitem_num];
+         orderSummaryUpdate(price_arr[orderitem_num], delta_quantity);
+         // console.log(target_name);
+
+     }
+
+
 
 }
