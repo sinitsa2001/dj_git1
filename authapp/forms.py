@@ -1,6 +1,10 @@
+import hashlib
+import random
+
+import salt as salt
 from django.contrib.auth.forms import AuthenticationForm,UserCreationForm,UserChangeForm
 from django import forms
-from authapp.models import User
+from authapp.models import User, UserProfile
 
 
 class UserLoginForm(AuthenticationForm):
@@ -33,7 +37,17 @@ class UserRegisterForm(UserCreationForm):
         self.fields['password1'].widget.attrs['placeholder'] = 'Введите пароль'
         self.fields['password2'].widget.attrs['placeholder'] = 'Подтвердите пароль'
         # self.fields['age'].widget.attrs['placeholder'] = 'Введите ваш возраст'
-        # self.fields['avatar'].widget.attrs['class'] = True,'custom-file-input'
+        # self.fields['avatar'].widget.attrs['class'] = True,'custom-file-input'a
+
+    def save(self):
+        user = super().save()
+
+        user.is_active = False
+        salt = hashlib.sha1(str(random.random()).encode('utf8')).hexdigest()[:6]
+        user.activation_key = hashlib.sha1((user.email + salt).encode('utf8')).hexdigest()
+        user.save()
+
+        return user
 
 
 
@@ -65,3 +79,20 @@ class UserProfileForm(UserChangeForm):
 #         raise ValidationError('Вы не достигли совершеннолетия', code='invaled_age')
 #
 #     return  age
+
+
+class UserProfileEditForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ('tagline', 'about_me','gender')
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+
+            # if field_name == 'gender':
+            #     field.widget.attrs['class'] = 'form-control'
+            # else:
+            #     field.widget.attrs['class'] = 'form-control'

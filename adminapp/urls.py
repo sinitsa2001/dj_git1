@@ -15,5 +15,17 @@ urlpatterns = [
     path('users/remove/<int:pk>/', adminapp.UserDeleteView.as_view(), name='admin_users_remove'),
     # path('categories/', adminapp.categories, name='categories'),
     # path('logout/', adminapp.logout, name='logout'),
+    path('categories/create', adminapp.category_create, name='admin_category_create'),
+    path('categories/read', adminapp.categories, name ='admin_categories'),
+    path('categories/update/<int:pk>', adminapp.category_update, name ='admin_category_update_delete'),
+    path('categories/delete/<int:pk>', adminapp.category_delete, name = 'admin_category_delete'),
+
+    path('products/create/category/<int:pk>', adminapp.product_create, name = 'admin_product_create'),
+    path('products/read/category/<int:pk>', adminapp.products, name = 'admin_product_create'),
+    path('products/read/<int:pk>', adminapp.product_read, name = 'admin_product_read'),
+    path('products/update/<int:pk>', adminapp.product_update, name = 'admin_product_update'),
+    path('products/delete/<int:pk>', adminapp.product_delete, name = 'admin_product_delete'),
+
+
 
 ]
